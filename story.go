@@ -63,15 +63,17 @@ const defaultHandlerTemplate = `
 		}
 	</style>
 	<body>
-	<h1>{{.Title}}</h1>
-	{{range .Story}}
-		<p>{{.}}</p>
-	{{end}}
-	<ul>
-	{{range .Options}}
-		<li><a href="/{{.Arc}}">{{.Text}}</a></li>
-	{{end}}
-	</ul>
+	<section class="page">
+		<h1>{{.Title}}</h1>
+		{{range .Story}}
+			<p>{{.}}</p>
+		{{end}}
+		<ul>
+		{{range .Options}}
+			<li><a href="/{{.Arc}}">{{.Text}}</a></li>
+		{{end}}
+		</ul>
+	<section>
 	</body>
 </html>
 `
@@ -91,6 +93,7 @@ type Option struct {
 
 type handler struct {
 	s Story
+	t *template.Template
 }
 
 func JsonStory(r io.Reader) (Story, error) {
@@ -102,8 +105,11 @@ func JsonStory(r io.Reader) (Story, error) {
 	return story, nil
 }
 
-func NewHandler(s Story) http.Handler {
-	return handler{s}
+func NewHandler(s Story, t *template.Template) http.Handler {
+	if t == nil {
+		t = tpl
+	}
+	return handler{s, t}
 }
 
 func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
